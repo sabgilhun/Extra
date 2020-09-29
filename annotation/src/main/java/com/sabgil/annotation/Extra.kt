@@ -1,4 +1,5 @@
 package com.sabgil.annotation
 
-class Extra {
-}
+@Target(AnnotationTarget.FIELD)
+@Retention(AnnotationRetention.SOURCE)
+annotation class Extra
