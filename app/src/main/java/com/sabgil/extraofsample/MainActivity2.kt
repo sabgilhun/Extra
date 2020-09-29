@@ -4,16 +4,16 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.sabgil.annotation.Extra
 
-class MainActivity : AppCompatActivity() {
+class MainActivity2 : AppCompatActivity() {
 
     @Extra
     private val a: Int = 0
 
     @Extra
-    private val b: String = ""
+    private val b: Int = 0
 
     @Extra
-    private val c: Test? = null
+    private val c: Int = 0
 
     @Extra
     private val d: Int = 0
@@ -21,9 +21,5 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        println(Mapper.map("b", intent, this.javaClass))
     }
-
-    class Test
 }
