@@ -2,12 +2,11 @@ package com.sabgil.processor
 
 import com.google.auto.service.AutoService
 import com.sabgil.annotation.Extra
+import com.sabgil.processor.ExtraMethodType.Companion.mapTo
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.io.File
-import java.lang.IllegalStateException
 import javax.annotation.processing.AbstractProcessor
-import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
@@ -15,10 +14,7 @@ import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
-import javax.lang.model.type.TypeKind
-import javax.lang.model.type.TypeMirror
 import javax.tools.Diagnostic
-import kotlin.system.exitProcess
 
 @AutoService(Processor::class)
 class ExtraProcessor : AbstractProcessor() {
@@ -33,10 +29,9 @@ class ExtraProcessor : AbstractProcessor() {
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
 
     override fun process(set: Set<TypeElement>, roundEnvironment: RoundEnvironment): Boolean {
-        println("start")
         val elements: Set<Element> = roundEnvironment.getElementsAnnotatedWith(Extra::class.java)
 
-        val activityMap = mutableMapOf<ClassName, MutableList<ExtraModel>>()
+        val activityMap = mutableMapOf<ClassName, MutableList<FieldData>>()
 
         elements.forEach {
             if (it.kind != ElementKind.FIELD) {
@@ -57,7 +52,7 @@ class ExtraProcessor : AbstractProcessor() {
             (it.enclosingElement as TypeElement).simpleName
             val methodList = activityMap[classNName] ?: mutableListOf()
 
-            methodList.add(ExtraModel(it.simpleName.toString(), it.asType()))
+            methodList.add(FieldData(it.simpleName.toString(), it.asType()))
             activityMap.putIfAbsent(classNName, methodList)
         }
 
@@ -95,7 +90,7 @@ class ExtraProcessor : AbstractProcessor() {
                 .beginControlFlow("return when(filedName)")
 
             activityMap[className]?.forEach {
-                funSpec.addStatement(mappingType(it), it.filedName, it.filedName)
+                funSpec.addStatement(mappingType(it), it.fieldName, it.fieldName)
             }
 
             funSpec.addStatement("else -> throw com.sabgil.exception.NotFoundFiledNameException()")
@@ -115,7 +110,7 @@ class ExtraProcessor : AbstractProcessor() {
         outerMapperFunSpec.addStatement("else -> throw com.sabgil.exception.NotFoundActivityClassException()")
             .endControlFlow()
 
-        val fileSpec = FileSpec.builder("com.sabgil.extraofsample", "Mapper")
+        val fileSpec = FileSpec.builder("", "Mapper")
             .addType(
                 mapperObjectSpecBuilder.addFunction(
                     outerMapperFunSpec.build()
@@ -133,31 +128,5 @@ class ExtraProcessor : AbstractProcessor() {
         return true
     }
 
-    data class ExtraModel(
-        val filedName: String,
-        val type: TypeMirror
-    )
-
-    private fun mappingType(extraModel: ExtraModel): String {
-        val type = extraModel.type
-        return if (type.kind.isPrimitive) {
-            when (type.kind) {
-                TypeKind.BOOLEAN -> "%S -> intent.getBooleanExtra(%S, false)"
-                TypeKind.BYTE -> "%S -> intent.getByteExtra(%S, Byte.MIN_VALUE)"
-                TypeKind.SHORT -> "%S -> intent.getShortExtra(%S, Short.MIN_VALUE)"
-                TypeKind.INT -> "%S -> intent.getIntExtra(%S, 0)"
-                TypeKind.LONG -> "%S -> intent.getLongExtra(%S, 0L)"
-                TypeKind.CHAR -> "%S -> intent.getCharExtra(%S, Char.MIN_VALUE)"
-                TypeKind.FLOAT -> "%S -> intent.getFloatExtra(%S, 0f)"
-                TypeKind.DOUBLE -> "%S -> intent.getDoubleExtra(%S, 0.0)"
-                else -> throw IllegalStateException()
-            }
-        } else {
-            if(type.toString() == "java.lang.String") {
-                "%S -> intent.getStringExtra(%S)"
-            } else {
-                "%S -> intent.getSerializableExtra(%S)"
-            }
-        }
-    }
+    private fun mappingType(fieldData: FieldData) = fieldData.mapTo().methodFormat
 }
