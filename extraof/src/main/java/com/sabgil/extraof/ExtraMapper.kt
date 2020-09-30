@@ -9,6 +9,7 @@ interface ExtraMapper {
     companion object {
         private var extraMapper: ExtraMapper? = null
 
+        @Synchronized
         fun map(fieldName: String, intent: Intent, intentOwnerClass: Class<*>): Any? {
             val _extraMapper =
                 extraMapper ?: Class.forName("ExtraMapperImpl").newInstance() as ExtraMapper

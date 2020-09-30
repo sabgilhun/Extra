@@ -8,23 +8,12 @@ import com.sabgil.extraof.extraOf
 class MainActivity : AppCompatActivity() {
 
     @Extra
-    private val a: Int by extraOf()
-
-    @Extra
-    private val b: String = ""
-
-    @Extra
-    private val c: Test? = null
-
-    @Extra
-    private val d: Int = 0
+    private val aqsASASAS: String by extraOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        println(a)
+        println(aqsASASAS)
     }
-
-    class Test
 }

@@ -1,6 +1,5 @@
 package com.sabgil.processor.common
 
-const val WRONG_ANNOTATION_PLACE_ASSERT = "Extra annotation unable to place in not field"
 const val KAPT_GENERATED_PACKAGE = "kapt.kotlin.generated"
 
 object Outer {
