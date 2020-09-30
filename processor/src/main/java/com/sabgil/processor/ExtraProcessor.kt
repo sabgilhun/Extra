@@ -11,8 +11,6 @@ import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
@@ -34,7 +32,7 @@ class ExtraProcessor : AbstractProcessor() {
         val activityMap = mutableMapOf<ClassName, MutableList<FieldData>>()
 
         elements.forEach {
-            if (it.kind != ElementKind.FIELD) {
+            if (!it.kind.isField) {
                 processingEnv.messager.printMessage(
                     Diagnostic.Kind.ERROR,
                     "Extra annotation unable to place to not filed"
@@ -42,18 +40,11 @@ class ExtraProcessor : AbstractProcessor() {
                 return false
             }
 
-            var e: Element = it.enclosingElement
-            val simpleName = (e as TypeElement).simpleName.toString()
-            while (e !is PackageElement) {
-                e = e.enclosingElement
-            }
-            val packageName = e.qualifiedName.toString()
-            val classNName = ClassName(packageName, simpleName)
-            (it.enclosingElement as TypeElement).simpleName
-            val methodList = activityMap[classNName] ?: mutableListOf()
+            val className = it.toClassName()
+            val methodList = activityMap[className] ?: mutableListOf()
 
             methodList.add(FieldData(it.simpleName.toString(), it.asType()))
-            activityMap.putIfAbsent(classNName, methodList)
+            activityMap.putIfAbsent(className, methodList)
         }
 
         if (activityMap.isEmpty()) {
