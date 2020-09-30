@@ -32,7 +32,7 @@ class ExtraProcessor : AbstractProcessor() {
         val fieldMap = classifyByIntentOwner(elements) {
             processingEnv.messager.printMessage(
                 Diagnostic.Kind.ERROR,
-                "Extra annotation unable to place to not filed"
+                WRONG_ANNOTATION_PLACE_ASSERT
             )
             return false
         }
@@ -41,12 +41,15 @@ class ExtraProcessor : AbstractProcessor() {
             return false
         }
 
-        val mapperObjectSpecBuilder = TypeSpec.objectBuilder("Mapper")
-        val outerMapperFunSpec = FunSpec.builder("map")
-            .addParameter("filedName", String::class)
-            .addParameter("intent", ClassName("android.content", "Intent"))
+        val mapperObjectSpecBuilder = TypeSpec.objectBuilder(OUTER_MAPPER_NAME)
+        val outerMapperFunSpec = FunSpec.builder(OUTER_MAPPER_METHOD_NAME)
+            .addParameter(OUTER_MAPPER_METHOD_PARAM_NAME__FIELD_NAME, String::class)
             .addParameter(
-                "activityClass",
+                OUTER_MAPPER_METHOD_PARAM_NAME__INTENT,
+                ClassName("android.content", "Intent")
+            )
+            .addParameter(
+                OUTER_MAPPER_METHOD_PARAM_NAME__INTENT_OWNER_CLASS,
                 ClassName("java.lang", "Class")
                     .parameterizedBy(
                         ClassName(
@@ -55,22 +58,28 @@ class ExtraProcessor : AbstractProcessor() {
                     )
             )
             .returns(Any::class.asTypeName().copy(true))
-            .beginControlFlow("return when(activityClass)")
+            .beginControlFlow("return when(%L)", OUTER_MAPPER_METHOD_PARAM_NAME__INTENT_OWNER_CLASS)
 
         val activityMapperFileSpecList = mutableListOf<FileSpec>()
         fieldMap.keys.forEach { className ->
             outerMapperFunSpec.addStatement(
-                "%L::class.java -> %L_Mapper.map(filedName, intent)",
-                className.canonicalName,
-                className.canonicalName
+                "%L -> %L.%L(%L, %L)",
+                className.canonicalName.addJavaClassKeyword(),
+                className.canonicalName.addInnerMapperClassSuffix(),
+                INNER_MAPPER_METHOD_NAME,
+                OUTER_MAPPER_METHOD_PARAM_NAME__FIELD_NAME,
+                OUTER_MAPPER_METHOD_PARAM_NAME__INTENT
             )
             val funSpec = FunSpec.builder("map")
-                .addParameter("filedName", String::class)
-                .addParameter("intent", ClassName("android.content", "Intent"))
+                .addParameter(INNER_MAPPER_METHOD_PARAM_NAME__FIELD_NAME, String::class)
+                .addParameter(
+                    INNER_MAPPER_METHOD_PARAM_NAME__INTENT,
+                    ClassName("android.content", "Intent")
+                )
                 .returns(Any::class.asTypeName().copy(true))
-                .beginControlFlow("return when(filedName)")
+                .beginControlFlow("return when(%L)", INNER_MAPPER_METHOD_PARAM_NAME__FIELD_NAME)
 
-            fieldMap[className]?.forEach() {
+            fieldMap[className]?.forEach {
                 funSpec.addStatement(mappingType(it), it.fieldName, it.fieldName)
             }
 
@@ -78,9 +87,12 @@ class ExtraProcessor : AbstractProcessor() {
                 .endControlFlow()
 
             activityMapperFileSpecList.add(
-                FileSpec.builder(className.packageName, className.simpleName + "_Mapper")
+                FileSpec.builder(
+                    className.packageName,
+                    className.simpleName.addInnerMapperClassSuffix()
+                )
                     .addType(
-                        TypeSpec.objectBuilder(className.simpleName + "_Mapper")
+                        TypeSpec.objectBuilder(className.simpleName.addInnerMapperClassSuffix())
                             .addFunction(funSpec.build())
                             .build()
                     )
@@ -99,7 +111,7 @@ class ExtraProcessor : AbstractProcessor() {
             )
             .build()
 
-        val kaptKotlinGeneratedDir = processingEnv.options["kapt.kotlin.generated"]
+        val kaptKotlinGeneratedDir = processingEnv.options[KAPT_GENERATED_PACKAGE]
         val file = File(kaptKotlinGeneratedDir, "")
         fileSpec.writeTo(file)
 
@@ -135,4 +147,7 @@ class ExtraProcessor : AbstractProcessor() {
 
         return map
     }
+
+    private fun String.addJavaClassKeyword() = "$this::class.java"
+    private fun String.addInnerMapperClassSuffix() = "${this}_$INNER_MAPPER_NAME_SUFFIX"
 }
