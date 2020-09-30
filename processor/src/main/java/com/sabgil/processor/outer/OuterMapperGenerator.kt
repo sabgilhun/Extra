@@ -1,16 +1,13 @@
 package com.sabgil.processor.outer
 
 import com.sabgil.processor.common.*
-import com.sabgil.processor.common.model.FieldData
 import com.sabgil.processor.common.Outer.METHOD_NAME
 import com.sabgil.processor.common.Outer.NAME
 import com.sabgil.processor.common.Outer.PARAM_NAME__FIELD_NAME
 import com.sabgil.processor.common.Outer.PARAM_NAME__INTENT
 import com.sabgil.processor.common.Outer.PARAM_NAME__INTENT_OWNER_CLASS
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.TypeSpec
+import com.sabgil.processor.common.model.FieldData
+import com.squareup.kotlinpoet.*
 
 class OuterMapperGenerator(
     private val fieldMap: Map<ClassName, List<FieldData>>
@@ -20,16 +17,18 @@ class OuterMapperGenerator(
 
     fun generate(): FileSpec =
         FileSpec.builder(ROOT_PACKAGE, NAME)
-            .addType(objectBuild())
+            .addType(classBuild())
             .build()
 
-    private fun objectBuild(): TypeSpec =
-        TypeSpec.objectBuilder(NAME)
+    private fun classBuild(): TypeSpec =
+        TypeSpec.classBuilder(NAME)
+            .addSuperinterface(typeExtraMapper)
             .addFunction(funBuild())
             .build()
 
     private fun funBuild(): FunSpec =
         FunSpec.builder(METHOD_NAME)
+            .addModifiers(KModifier.OVERRIDE)
             .addParameter(PARAM_NAME__FIELD_NAME, typeString)
             .addParameter(PARAM_NAME__INTENT, typeIntent)
             .addParameter(PARAM_NAME__INTENT_OWNER_CLASS, typeClassParameterizedByActivity)
