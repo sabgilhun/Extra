@@ -3,11 +3,12 @@ package com.sabgil.extraofsample
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.sabgil.annotation.Extra
+import com.sabgil.extraof.extraOf
 
 class MainActivity : AppCompatActivity() {
 
     @Extra
-    private val a: Int = 0
+    private val a: Int by extraOf()
 
     @Extra
     private val b: String = ""
@@ -22,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        println(Mapper.map("b", intent, this.javaClass))
+        println(a)
     }
 
     class Test

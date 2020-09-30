@@ -1,3 +1,4 @@
+include ':extraof'
 include ':annotation'
 include ':processor'
 include ':app'

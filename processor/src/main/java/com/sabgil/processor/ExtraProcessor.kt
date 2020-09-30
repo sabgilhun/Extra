@@ -13,6 +13,7 @@ import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
@@ -66,7 +67,8 @@ class ExtraProcessor : AbstractProcessor() {
         val map = hashMapOf<ClassName, List<FieldData>>()
 
         elements.forEach { element ->
-            if (!element.kind.isField) {
+            if (!(element.kind.isField || element.kind == ElementKind.METHOD)) {
+                println(element.kind)
                 onFoundNotField()
                 return emptyMap()
             }

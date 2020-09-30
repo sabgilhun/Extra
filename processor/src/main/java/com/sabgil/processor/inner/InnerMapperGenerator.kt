@@ -44,7 +44,6 @@ class InnerMapperGenerator(
             .build()
 
     private fun FunSpec.Builder.addWhenCasesStatement(): FunSpec.Builder {
-        println(fieldDataList.size)
         fieldDataList.forEach { fieldData ->
             addStatement(mappingType(fieldData), fieldData.fieldName, fieldData.fieldName)
         }
