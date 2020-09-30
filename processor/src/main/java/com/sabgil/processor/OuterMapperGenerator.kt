@@ -35,10 +35,12 @@ class OuterMapperGenerator(
             .returns(Any::class.asTypeName().copy(true))
             .beginControlFlow("return when(%L)", OUTER_MAPPER_METHOD_PARAM_NAME__INTENT_OWNER_CLASS)
             .addWhenCasesStatement()
+            .addStatement("else -> throw com.sabgil.exception.NotFoundActivityClassException()")
+            .endControlFlow()
             .build()
 
     private fun FunSpec.Builder.addWhenCasesStatement(): FunSpec.Builder {
-        fieldMap.keys.forEach {className ->
+        fieldMap.keys.forEach { className ->
             addStatement(
                 "%L -> %L.%L(%L, %L)",
                 className.canonicalName.addJavaClassKeyword(),

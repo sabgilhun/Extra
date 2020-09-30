@@ -2,9 +2,7 @@ package com.sabgil.processor
 
 import com.google.auto.service.AutoService
 import com.sabgil.annotation.Extra
-import com.sabgil.processor.ExtraMethodType.Companion.mapTo
-import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.ClassName
 import java.io.File
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Processor
@@ -41,87 +39,23 @@ class ExtraProcessor : AbstractProcessor() {
             return false
         }
 
-        val mapperObjectSpecBuilder = TypeSpec.objectBuilder(OUTER_MAPPER_NAME)
-        val outerMapperFunSpec = FunSpec.builder(OUTER_MAPPER_METHOD_NAME)
-            .addParameter(OUTER_MAPPER_METHOD_PARAM_NAME__FIELD_NAME, String::class)
-            .addParameter(
-                OUTER_MAPPER_METHOD_PARAM_NAME__INTENT,
-                ClassName("android.content", "Intent")
-            )
-            .addParameter(
-                OUTER_MAPPER_METHOD_PARAM_NAME__INTENT_OWNER_CLASS,
-                ClassName("java.lang", "Class")
-                    .parameterizedBy(
-                        ClassName(
-                            "android.app", "Activity"
-                        )
-                    )
-            )
-            .returns(Any::class.asTypeName().copy(true))
-            .beginControlFlow("return when(%L)", OUTER_MAPPER_METHOD_PARAM_NAME__INTENT_OWNER_CLASS)
-
-        val activityMapperFileSpecList = mutableListOf<FileSpec>()
-        fieldMap.keys.forEach { className ->
-            outerMapperFunSpec.addStatement(
-                "%L -> %L.%L(%L, %L)",
-                className.canonicalName.addJavaClassKeyword(),
-                className.canonicalName.addInnerMapperClassSuffix(),
-                INNER_MAPPER_METHOD_NAME,
-                OUTER_MAPPER_METHOD_PARAM_NAME__FIELD_NAME,
-                OUTER_MAPPER_METHOD_PARAM_NAME__INTENT
-            )
-            val funSpec = FunSpec.builder("map")
-                .addParameter(INNER_MAPPER_METHOD_PARAM_NAME__FIELD_NAME, String::class)
-                .addParameter(
-                    INNER_MAPPER_METHOD_PARAM_NAME__INTENT,
-                    ClassName("android.content", "Intent")
-                )
-                .returns(Any::class.asTypeName().copy(true))
-                .beginControlFlow("return when(%L)", INNER_MAPPER_METHOD_PARAM_NAME__FIELD_NAME)
-
-            fieldMap[className]?.forEach {
-                funSpec.addStatement(mappingType(it), it.fieldName, it.fieldName)
-            }
-
-            funSpec.addStatement("else -> throw com.sabgil.exception.NotFoundFiledNameException()")
-                .endControlFlow()
-
-            activityMapperFileSpecList.add(
-                FileSpec.builder(
-                    className.packageName,
-                    className.simpleName.addInnerMapperClassSuffix()
-                )
-                    .addType(
-                        TypeSpec.objectBuilder(className.simpleName.addInnerMapperClassSuffix())
-                            .addFunction(funSpec.build())
-                            .build()
-                    )
-                    .build()
-            )
+        val outerMapperFileSpec = OuterMapperGenerator(fieldMap).generate()
+        val innerMapperFileSpecs = fieldMap.entries.map {
+            InnerMapperGenerator(
+                it.key,
+                it.value
+            ).generate()
         }
 
-        outerMapperFunSpec.addStatement("else -> throw com.sabgil.exception.NotFoundActivityClassException()")
-            .endControlFlow()
+        val file = createKotlinGeneratedDir()
+        outerMapperFileSpec.writeTo(file)
 
-        val fileSpec = FileSpec.builder("", "Mapper")
-            .addType(
-                mapperObjectSpecBuilder.addFunction(
-                    outerMapperFunSpec.build()
-                ).build()
-            )
-            .build()
-
-        val kaptKotlinGeneratedDir = processingEnv.options[KAPT_GENERATED_PACKAGE]
-        val file = File(kaptKotlinGeneratedDir, "")
-        fileSpec.writeTo(file)
-
-        activityMapperFileSpecList.forEach {
+        innerMapperFileSpecs.forEach {
             it.writeTo(file)
         }
+
         return true
     }
-
-    private fun mappingType(fieldData: FieldData) = fieldData.mapTo().methodFormat
 
     private inline fun classifyByIntentOwner(
         elements: Set<Element>,
@@ -142,12 +76,13 @@ class ExtraProcessor : AbstractProcessor() {
                 FieldData(element.simpleName.toString(), element.asType())
             )
 
-            map.putIfAbsent(className, methodList)
+            map[className] = methodList
         }
 
         return map
     }
 
-    private fun String.addJavaClassKeyword() = "$this::class.java"
-    private fun String.addInnerMapperClassSuffix() = "${this}_$INNER_MAPPER_NAME_SUFFIX"
+    private fun createKotlinGeneratedDir() = File(
+        processingEnv.options[KAPT_GENERATED_PACKAGE], ""
+    )
 }
