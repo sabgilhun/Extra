@@ -1,41 +1,40 @@
 package com.sabgil.processor
 
-import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.sabgil.processor.Outer.METHOD_NAME
+import com.sabgil.processor.Outer.NAME
+import com.sabgil.processor.Outer.PARAM_NAME__FIELD_NAME
+import com.sabgil.processor.Outer.PARAM_NAME__INTENT
+import com.sabgil.processor.Outer.PARAM_NAME__INTENT_OWNER_CLASS
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.TypeSpec
 
 class OuterMapperGenerator(
     private val fieldMap: Map<ClassName, List<FieldData>>
 ) {
+    private val notFoundActivityClassFormat =
+        "else -> throw com.sabgil.exception.NotFoundActivityClassException()"
+
     fun generate(): FileSpec =
-        FileSpec.builder(ROOT_PACKAGE, OUTER_MAPPER_NAME)
+        FileSpec.builder(ROOT_PACKAGE, NAME)
             .addType(objectBuild())
             .build()
 
     private fun objectBuild(): TypeSpec =
-        TypeSpec.objectBuilder(OUTER_MAPPER_NAME)
+        TypeSpec.objectBuilder(NAME)
             .addFunction(funBuild())
             .build()
 
     private fun funBuild(): FunSpec =
-        FunSpec.builder(OUTER_MAPPER_METHOD_NAME)
-            .addParameter(OUTER_MAPPER_METHOD_PARAM_NAME__FIELD_NAME, String::class)
-            .addParameter(
-                OUTER_MAPPER_METHOD_PARAM_NAME__INTENT,
-                ClassName("android.content", "Intent")
-            )
-            .addParameter(
-                OUTER_MAPPER_METHOD_PARAM_NAME__INTENT_OWNER_CLASS,
-                ClassName("java.lang", "Class")
-                    .parameterizedBy(
-                        ClassName(
-                            "android.app", "Activity"
-                        )
-                    )
-            )
-            .returns(Any::class.asTypeName().copy(true))
-            .beginControlFlow("return when(%L)", OUTER_MAPPER_METHOD_PARAM_NAME__INTENT_OWNER_CLASS)
+        FunSpec.builder(METHOD_NAME)
+            .addParameter(PARAM_NAME__FIELD_NAME, typeString)
+            .addParameter(PARAM_NAME__INTENT, typeIntent)
+            .addParameter(PARAM_NAME__INTENT_OWNER_CLASS, typeClassParameterizedByActivity)
+            .returns(typeNullableAny)
+            .beginControlFlow("return when(%L)", PARAM_NAME__INTENT_OWNER_CLASS)
             .addWhenCasesStatement()
-            .addStatement("else -> throw com.sabgil.exception.NotFoundActivityClassException()")
+            .addStatement(notFoundActivityClassFormat)
             .endControlFlow()
             .build()
 
@@ -45,9 +44,9 @@ class OuterMapperGenerator(
                 "%L -> %L.%L(%L, %L)",
                 className.canonicalName.addJavaClassKeyword(),
                 className.canonicalName.addInnerMapperClassSuffix(),
-                INNER_MAPPER_METHOD_NAME,
-                OUTER_MAPPER_METHOD_PARAM_NAME__FIELD_NAME,
-                OUTER_MAPPER_METHOD_PARAM_NAME__INTENT
+                Inner.METHOD_NAME,
+                PARAM_NAME__FIELD_NAME,
+                PARAM_NAME__INTENT
             )
         }
 
@@ -55,7 +54,7 @@ class OuterMapperGenerator(
     }
 
     private fun String.addJavaClassKeyword() = "$this::class.java"
-    private fun String.addInnerMapperClassSuffix() = "${this}_$INNER_MAPPER_NAME_SUFFIX"
+    private fun String.addInnerMapperClassSuffix() = "${this}_${Inner.NAME_SUFFIX}"
 }
 
 private const val ROOT_PACKAGE = ""

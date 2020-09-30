@@ -48,11 +48,9 @@ class ExtraProcessor : AbstractProcessor() {
         }
 
         val file = createKotlinGeneratedDir()
-        outerMapperFileSpec.writeTo(file)
 
-        innerMapperFileSpecs.forEach {
-            it.writeTo(file)
-        }
+        outerMapperFileSpec.writeTo(file)
+        innerMapperFileSpecs.forEach { it.writeTo(file) }
 
         return true
     }
