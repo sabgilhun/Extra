@@ -1,4 +1,4 @@
-package com.sabgil.processor
+package com.sabgil.processor.common.model
 
 import javax.lang.model.type.TypeMirror
 

@@ -2,6 +2,10 @@ package com.sabgil.processor
 
 import com.google.auto.service.AutoService
 import com.sabgil.annotation.Extra
+import com.sabgil.processor.common.model.FieldData
+import com.sabgil.processor.common.toClassName
+import com.sabgil.processor.inner.InnerMapperGenerator
+import com.sabgil.processor.outer.OuterMapperGenerator
 import com.squareup.kotlinpoet.ClassName
 import java.io.File
 import javax.annotation.processing.AbstractProcessor
@@ -30,7 +34,7 @@ class ExtraProcessor : AbstractProcessor() {
         val fieldMap = classifyByIntentOwner(elements) {
             processingEnv.messager.printMessage(
                 Diagnostic.Kind.ERROR,
-                WRONG_ANNOTATION_PLACE_ASSERT
+                com.sabgil.processor.common.WRONG_ANNOTATION_PLACE_ASSERT
             )
             return false
         }
@@ -81,6 +85,6 @@ class ExtraProcessor : AbstractProcessor() {
     }
 
     private fun createKotlinGeneratedDir() = File(
-        processingEnv.options[KAPT_GENERATED_PACKAGE], ""
+        processingEnv.options[com.sabgil.processor.common.KAPT_GENERATED_PACKAGE], ""
     )
 }

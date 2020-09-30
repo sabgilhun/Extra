@@ -1,5 +1,6 @@
-package com.sabgil.processor
+package com.sabgil.processor.inner
 
+import com.sabgil.processor.common.model.FieldData
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 

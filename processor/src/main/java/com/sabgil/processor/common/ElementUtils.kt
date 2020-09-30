@@ -1,4 +1,4 @@
-package com.sabgil.processor
+package com.sabgil.processor.common
 
 import com.squareup.kotlinpoet.ClassName
 import javax.lang.model.element.Element

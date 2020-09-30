@@ -1,10 +1,12 @@
-package com.sabgil.processor
+package com.sabgil.processor.outer
 
-import com.sabgil.processor.Outer.METHOD_NAME
-import com.sabgil.processor.Outer.NAME
-import com.sabgil.processor.Outer.PARAM_NAME__FIELD_NAME
-import com.sabgil.processor.Outer.PARAM_NAME__INTENT
-import com.sabgil.processor.Outer.PARAM_NAME__INTENT_OWNER_CLASS
+import com.sabgil.processor.common.*
+import com.sabgil.processor.common.model.FieldData
+import com.sabgil.processor.common.Outer.METHOD_NAME
+import com.sabgil.processor.common.Outer.NAME
+import com.sabgil.processor.common.Outer.PARAM_NAME__FIELD_NAME
+import com.sabgil.processor.common.Outer.PARAM_NAME__INTENT
+import com.sabgil.processor.common.Outer.PARAM_NAME__INTENT_OWNER_CLASS
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
