@@ -29,26 +29,16 @@ class ExtraProcessor : AbstractProcessor() {
     override fun process(set: Set<TypeElement>, roundEnvironment: RoundEnvironment): Boolean {
         val elements: Set<Element> = roundEnvironment.getElementsAnnotatedWith(Extra::class.java)
 
-        val activityMap = mutableMapOf<ClassName, MutableList<FieldData>>()
-
-        elements.forEach {
-            if (!it.kind.isField) {
-                processingEnv.messager.printMessage(
-                    Diagnostic.Kind.ERROR,
-                    "Extra annotation unable to place to not filed"
-                )
-                return false
-            }
-
-            val className = it.toClassName()
-            val methodList = activityMap[className] ?: mutableListOf()
-
-            methodList.add(FieldData(it.simpleName.toString(), it.asType()))
-            activityMap.putIfAbsent(className, methodList)
+        val fieldMap = classifyByIntentOwner(elements) {
+            processingEnv.messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "Extra annotation unable to place to not filed"
+            )
+            return false
         }
 
-        if (activityMap.isEmpty()) {
-            return true
+        if (fieldMap.isEmpty()) {
+            return false
         }
 
         val mapperObjectSpecBuilder = TypeSpec.objectBuilder("Mapper")
@@ -68,7 +58,7 @@ class ExtraProcessor : AbstractProcessor() {
             .beginControlFlow("return when(activityClass)")
 
         val activityMapperFileSpecList = mutableListOf<FileSpec>()
-        activityMap.keys.forEach { className ->
+        fieldMap.keys.forEach { className ->
             outerMapperFunSpec.addStatement(
                 "%L::class.java -> %L_Mapper.map(filedName, intent)",
                 className.canonicalName,
@@ -80,7 +70,7 @@ class ExtraProcessor : AbstractProcessor() {
                 .returns(Any::class.asTypeName().copy(true))
                 .beginControlFlow("return when(filedName)")
 
-            activityMap[className]?.forEach {
+            fieldMap[className]?.forEach() {
                 funSpec.addStatement(mappingType(it), it.fieldName, it.fieldName)
             }
 
@@ -120,4 +110,29 @@ class ExtraProcessor : AbstractProcessor() {
     }
 
     private fun mappingType(fieldData: FieldData) = fieldData.mapTo().methodFormat
+
+    private inline fun classifyByIntentOwner(
+        elements: Set<Element>,
+        onFoundNotField: () -> Unit
+    ): Map<ClassName, List<FieldData>> {
+        val map = hashMapOf<ClassName, List<FieldData>>()
+
+        elements.forEach { element ->
+            if (!element.kind.isField) {
+                onFoundNotField()
+                return emptyMap()
+            }
+
+            val className = element.toClassName()
+            val methodList = map[className]?.toMutableList() ?: mutableListOf()
+
+            methodList.add(
+                FieldData(element.simpleName.toString(), element.asType())
+            )
+
+            map.putIfAbsent(className, methodList)
+        }
+
+        return map
+    }
 }
