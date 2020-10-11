@@ -1,0 +1,12 @@
+ext {
+    groupName = 'com.sabgil.extraof2'
+    libraryVersionName = '0.4.0'
+
+    repoName = 'and'
+    packageName = 'extraOf'
+
+    packageDesc = 'simple android extra injection library'
+
+    sourceUrl = 'https://github.com/sabgilhun/ExtraOf.git'
+    githubUrl = 'https://github.com/sabgilhun/ExtraOf'
+}

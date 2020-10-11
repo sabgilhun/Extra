@@ -2,4 +2,4 @@ include ':extraof'
 include ':annotation'
 include ':processor'
 include ':app'
-rootProject.name = "ExtraOfSample"
+rootProject.name = "ExtraOf"
