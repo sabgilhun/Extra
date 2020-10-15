@@ -12,6 +12,7 @@ task sourcesJar(type: Jar) {
 publishing {
     publications {
         Production(MavenPublication) {
+            artifact "$buildDir/libs/processor.jar"
             artifact sourcesJar
 
             groupId rootProject.ext.groupName
