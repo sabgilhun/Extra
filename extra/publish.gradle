@@ -4,27 +4,43 @@ apply plugin: 'com.jfrog.bintray'
 group = rootProject.ext.groupName
 version = rootProject.ext.libraryVersionName
 
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    archiveClassifier = 'sources'
+}
+
 publishing {
     publications {
         Production(MavenPublication) {
-            println("$buildDir")
-            artifact("$buildDir/outputs/aar/extraof-release.aar")
+
+            artifact "$buildDir/outputs/aar/extraof-release.aar"
+            artifact sourcesJar
+
             groupId rootProject.ext.groupName
-            artifactId 'extraof'
+            artifactId rootProject.ext.artifactId
             version rootProject.ext.libraryVersionName
 
-            pom.withXml {
-                def dependenciesNode = asNode()['dependencies'][0] ?: asNode().appendNode('dependencies')
-                configurations.implementation.allDependencies.each {
-                    if (it.name != 'unspecified') {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        println(it.group)
-                        println(it.name)
-                        println(it.version)
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
+            pom {
+                name = libraryName
+                description = rootProject.ext.packageDesc
+                url = rootProject.ext.githubUrl
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
+                }
+                developers {
+                    developer {
+                        id = 'sabgilhun'
+                        name = 'Yong Hun Kim'
+                        email = 'sabgilhun@gamil.com'
+                    }
+                }
+                scm {
+                    connection = rootProject.ext.sourceUrl
+                    developerConnection = rootProject.ext.sourceUrl
+                    url = rootProject.ext.githubUrl
                 }
             }
         }

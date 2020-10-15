@@ -1,12 +1,18 @@
 ext {
-    groupName = 'com.sabgil.extraof2'
-    libraryVersionName = '0.4.0'
+    libraryName = 'extra'
 
-    repoName = 'and'
-    packageName = 'extraOf'
+    groupName = 'cwd.sabgil.extra'
+    libraryVersionName = '0.1.0'
 
-    packageDesc = 'simple android extra injection library'
+    artifactId = 'extra'
+    compilerArtifactId = 'extra-compiler'
 
-    sourceUrl = 'https://github.com/sabgilhun/ExtraOf.git'
-    githubUrl = 'https://github.com/sabgilhun/ExtraOf'
+    repoName = 'android'
+    packageName = 'extra'
+    compilerPackageName = 'extra-compiler'
+
+    packageDesc = 'The android library handling extra of intent'
+
+    sourceUrl = 'https://github.com/sabgilhun/Extra.git'
+    githubUrl = 'https://github.com/sabgilhun/Extra'
 }
