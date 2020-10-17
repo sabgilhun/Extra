@@ -1,32 +1,36 @@
 package com.sabgil.processor.mapper
 
-import com.sabgil.processor.common.Inner.METHOD_NAME
-import com.sabgil.processor.common.Inner.NAME_SUFFIX
-import com.sabgil.processor.common.Inner.PARAM_NAME__FIELD_NAME
-import com.sabgil.processor.common.Inner.PARAM_NAME__INTENT
+import com.sabgil.processor.common.Mapper.MAPPER_MANAGER_PACKAGE_NAME
+import com.sabgil.processor.common.Mapper.METHOD_NAME
+import com.sabgil.processor.common.Mapper.NAME_SUFFIX
+import com.sabgil.processor.common.Mapper.PARAM_NAME__FIELD_NAME
+import com.sabgil.processor.common.Mapper.PARAM_NAME__INTENT
+import com.sabgil.processor.common.Mapper.PROPERTY_MANAGER_KEY_PACKAGE_NAME
 import com.sabgil.processor.common.model.FieldData
 import com.sabgil.processor.common.typeIntent
 import com.sabgil.processor.common.typeKProperty
 import com.sabgil.processor.common.typeNullableAny
 import com.sabgil.processor.common.typePropertyMapper
-import com.sabgil.processor.inner.ExtraMethodType.Companion.mapTo
+import com.sabgil.processor.mapper.ExtraMethodType.Companion.mapTo
 import com.squareup.kotlinpoet.*
 
 class MapperGenerator(
-    private val className: ClassName,
+    className: ClassName,
     private val fieldDataList: List<FieldData>
 ) {
+    private val mapperClassName = className.simpleName.addInnerMapperClassSuffix()
+    private val packageName = className.packageName
 
     private val notFoundFiledNameFormat =
         "else -> throw com.sabgil.exception.NotFoundFiledNameException()"
 
     fun generate(): FileSpec =
-        FileSpec.builder(className.packageName, className.simpleName.addInnerMapperClassSuffix())
+        FileSpec.builder(packageName, mapperClassName)
             .addType(classBuild())
             .build()
 
     private fun classBuild(): TypeSpec =
-        TypeSpec.classBuilder(className.simpleName.addInnerMapperClassSuffix())
+        TypeSpec.classBuilder(mapperClassName)
             .addSuperinterface(typePropertyMapper)
             .addFunction(funBuild())
             .addType(companionObjectBuild())
@@ -41,10 +45,15 @@ class MapperGenerator(
         CodeBlock.builder()
             .apply {
                 addStatement(
-                    "com.sabgil.extra.MapperManager.mappers.put(com.sabgil.extra.PropertyMapper.Key.withMapper(%L::class.java), %L())",
-                    className.simpleName.addInnerMapperClassSuffix(),
-                    className.simpleName.addInnerMapperClassSuffix()
+                    "val mappers = %M",
+                    MemberName(MAPPER_MANAGER_PACKAGE_NAME, "mappers")
                 )
+                addStatement(
+                    "val key = %M(%L::class.java)",
+                    MemberName(PROPERTY_MANAGER_KEY_PACKAGE_NAME, "withMapper"),
+                    mapperClassName
+                )
+                addStatement("mappers[key] = %L()", mapperClassName)
             }
             .build()
 

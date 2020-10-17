@@ -1,12 +1,8 @@
-package com.sabgil.processor.inner
+package com.sabgil.processor.mapper
 
 import com.sabgil.processor.common.model.FieldData
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
-
-object TypeMapper {
-
-}
 
 enum class ExtraMethodType(
     val methodFormat: String

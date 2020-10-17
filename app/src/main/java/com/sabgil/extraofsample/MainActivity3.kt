@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.sabgil.annotation.Extra
 import com.sabgil.extra.extra
-import com.sabgil.extra.extraOf
 
 class MainActivity3 : AppCompatActivity() {
 
