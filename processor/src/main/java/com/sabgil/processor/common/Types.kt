@@ -16,4 +16,4 @@ val typeClass: TypeName = ClassName("java.lang", "Class")
 val typeClassParameterizedByActivity: TypeName =
     (typeClass as ClassName).parameterizedBy(WildcardTypeName.producerOf(typeNullableAny))
 
-val typeExtraMapper: TypeName = ClassName("com.sabgil.extraof", "ExtraMapper")
+val typeExtraMapper: TypeName = ClassName("com.sabgil.extra", "ExtraMapper")
