@@ -17,3 +17,8 @@ val typeClassParameterizedByActivity: TypeName =
     (typeClass as ClassName).parameterizedBy(WildcardTypeName.producerOf(typeNullableAny))
 
 val typeExtraMapper: TypeName = ClassName("com.sabgil.extra", "ExtraMapper")
+
+val typePropertyMapper: TypeName = ClassName("com.sabgil.extra", "PropertyMapper")
+
+val typeKProperty: TypeName = ClassName("kotlin.reflect", "KProperty")
+    .parameterizedBy(WildcardTypeName.producerOf(typeNullableAny))

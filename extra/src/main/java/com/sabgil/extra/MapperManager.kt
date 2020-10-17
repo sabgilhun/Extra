@@ -2,21 +2,23 @@ package com.sabgil.extra
 
 object MapperManager {
 
-    private val mappers: Map<PropertyMapper.Key, PropertyMapper> = mutableMapOf()
+    @Suppress("MemberVisibilityCanBePrivate")
+    val mappers: MutableMap<PropertyMapper.Key, PropertyMapper> = mutableMapOf()
 
     operator fun get(key: PropertyMapper.Key): PropertyMapper {
         val mapper = mappers[key]
 
         if (mapper == null) {
             try {
-                Class.forName(key.implementedMapperName)
+                Class.forName(key.mapper)
             } catch (e: ClassNotFoundException) {
                 // TODO: print error message
             }
         }
 
+        // TODO: trim error message
         return mapper ?: requireNotNull(mappers[key]) {
-            "${key.clazz.simpleName} not found. check if there is @Extra annotation in ${key.clazz.simpleName}"
+            "${key.mapper} not found. check if there is @Extra annotation in ${key.mapper}"
         }
     }
 }

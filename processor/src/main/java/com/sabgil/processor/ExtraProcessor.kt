@@ -6,8 +6,7 @@ import com.sabgil.exception.IllegalAnnotationPlaceException
 import com.sabgil.exception.NotFoundFairElementException
 import com.sabgil.processor.common.model.FieldData
 import com.sabgil.processor.common.toClassName
-import com.sabgil.processor.inner.InnerMapperGenerator
-import com.sabgil.processor.outer.OuterMapperGenerator
+import com.sabgil.processor.mapper.MapperGenerator
 import com.squareup.kotlinpoet.ClassName
 import java.io.File
 import javax.annotation.processing.AbstractProcessor
@@ -40,18 +39,13 @@ class ExtraProcessor : AbstractProcessor() {
             return false
         }
 
-        val outerMapperFileSpec = OuterMapperGenerator(fieldMap).generate()
-        val innerMapperFileSpecs = fieldMap.entries.map {
-            InnerMapperGenerator(
+        val file = createKotlinGeneratedDir()
+        fieldMap.entries.map {
+            MapperGenerator(
                 it.key,
                 it.value
             ).generate()
-        }
-
-        val file = createKotlinGeneratedDir()
-
-        outerMapperFileSpec.writeTo(file)
-        innerMapperFileSpecs.forEach { it.writeTo(file) }
+        }.forEach { it.writeTo(file) }
 
         return true
     }

@@ -13,6 +13,6 @@ object Outer {
 object Inner {
     const val NAME_SUFFIX = "Mapper"
     const val METHOD_NAME = "map"
-    const val PARAM_NAME__FIELD_NAME = "fieldName"
+    const val PARAM_NAME__FIELD_NAME = "property"
     const val PARAM_NAME__INTENT = "intent"
 }

@@ -11,9 +11,9 @@ fun <T : Activity, B> T.extraOf(): ExtraValueHolder<B> {
 
 fun <T : Activity, B> T.extra(): ExtraValueHolder2<B> {
     return ExtraValueHolder2 { property ->
-        val propertyMapper = MapperManager[PropertyMapper.Key(this::class.java)]
+        val propertyMapper = MapperManager[PropertyMapper.Key.of(this::class.java)]
 
         @Suppress("UNCHECKED_CAST")
-        propertyMapper.map(property, intent, this::class.java) as B
+        propertyMapper.map(property, intent) as B
     }
 }
