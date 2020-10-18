@@ -13,7 +13,7 @@ publishing {
     publications {
         Production(MavenPublication) {
 
-            artifact "$buildDir/outputs/aar/extraof-release.aar"
+            artifact "$buildDir/outputs/aar/extra-release.aar"
             artifact sourcesJar
 
             groupId rootProject.ext.groupName
