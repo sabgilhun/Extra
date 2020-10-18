@@ -2,7 +2,7 @@ ext {
     libraryName = 'extra'
 
     groupName = 'cwd.sabgil.extra'
-    libraryVersionName = '0.2.0'
+    libraryVersionName = '1.1.0'
 
     artifactId = 'extra'
     compilerArtifactId = 'extra-compiler'
